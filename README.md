@@ -1,9 +1,12 @@
 # rxjava-agent
 
-Project provides java agent to debug rxjava subscription.
+Project provides java agent to debug rxjava subscription. Goal of it agent is to avoid rxjava operators using unbounded
+subscription with `Long#MAX_VALUE` - they use ERROR/DROP/BUFFER overflow strategies to manage backpressure and in effect
+application can fail or loose data. However, there is a group of applications which should run `Subscription#request`
+with manageable value after data is processed to keep memory under control and to not lose data.
 
-When any class implementing `org.reactivestreams.Subscription` will execute `request` method with argument bigger than
-10_000 then warning is logged. It is achieved with **ByteBuddy** instrumentation.
+Agent will add instrumentation to method `request` in any class implementing `org.reactivestreams.Subscription` - if it
+is executed with argument bigger than 10_000 then warning is logged. It is achieved with *ByteBuddy* instrumentation.
 
 Threshold can be changed using Java property, eg `-Drxjava.agent.subscription.request-logging-threshold=500`
 

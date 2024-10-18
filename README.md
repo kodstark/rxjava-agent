@@ -20,7 +20,7 @@ ByteBuddy code in *ShadowJar*. Agent jar will be placed in `build/libs/rxjava-ag
 
 `./gradlew build`
 
-## Use agent
+## Use agent directly
 
 Use `-javaagent` argument to enable this Java agent on your application or tests. For example:
 
@@ -30,4 +30,35 @@ java -javaagent:../rxjava-agent/build/libs/rxjava-agent-1.0-SNAPSHOT-all.jar ...
 # OR
 java -Drxjava.agent.subscription.request-logging-threshold=500 \
   -javaagent:../rxjava-agent/build/libs/rxjava-agent-1.0-SNAPSHOT-all.jar ...
+```
+
+## Use agent in Gradle tests
+
+Publish the agent to mavenLocal repository
+
+`./gradlew publishToMavenLocal`
+
+Update Gradle config for project which will use the rxjava-agent to attach it when running tests
+
+```kotlin
+
+repositories {
+  // ...
+  mavenLocal()
+}
+
+val rxjavaAgent = configurations.create("rxjavaAgent")
+
+dependencies {
+    // ...
+    rxjavaAgent("pl.kodstark:rxjava-agent:1.0.0-SNAPSHOT:all") { isTransitive = false }
+}
+
+tasks.withType<Test> {
+    // ...
+    jvmArgs = listOf(
+        "-javaagent:${rxjavaAgent.asPath}"
+    )
+}
+
 ```

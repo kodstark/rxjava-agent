@@ -1,14 +1,15 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("java")
+    id("java-library")
+    id("maven-publish")
     id("com.diffplug.spotless") version "6.25.0"
     id("io.spring.dependency-management") version "1.1.6"
     id("com.gradleup.shadow") version "8.3.3"
 }
 
 group = "pl.kodstark"
-version = "1.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -48,6 +49,22 @@ dependencies {
 tasks.withType<ShadowJar> {
     manifest {
         attributes("Premain-Class" to "pl.kodstark.rxjava.agent.SubscriptionAgent")
+    }
+}
+
+tasks.register<Jar>("sources") {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
     }
 }
 
